@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_yasg',
     'core',
-    'jobs',
+    'company',
+    'applications',
     'candidates',
 ]
 
@@ -118,6 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+#AUTH_USER_MODEL = 'accounts.User' -- will do later
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

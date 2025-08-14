@@ -5,17 +5,18 @@ import os
 def validate_pdf(value):
     ext = os.path.splitext(value.name)[1]
     valid_extensions = ['.pdf']
-
     if not ext.lower() in valid_extensions:
         raise ValidationError("Only PDF files are allowed.")
 
-# Create your models here.
 class Candidate(models.Model):
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='candidate_profile', default=1)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=15)
-    resume = models.FileField(upload_to='resumes/')
+    resume = models.FileField(upload_to='resumes/', validators=[validate_pdf])
+    profile_summary = models.TextField(blank=True, null=True)  # AI-generated or self-written
+    improvement_tips = models.JSONField(default=list, blank=True)  # AI suggestions
     skills = models.ManyToManyField('core.Skill', related_name='candidates')
     experience_years = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -23,6 +24,6 @@ class Candidate(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
-    
+
     class Meta:
         ordering = ['-created_at']
