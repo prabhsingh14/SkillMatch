@@ -4,9 +4,11 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import send_mail
 from django.utils import timezone
+from django.conf import settings
 from datetime import timedelta
 from .serializers import UserSerializer, SendOTPSerializer, VerifyOTPSerializer
 from .models import CustomUser, EmailOTP
+import requests
 
 #list all users -- admin only
 class UserListView(generics.ListAPIView):
@@ -72,4 +74,35 @@ class VerifyOTPView(APIView):
             "refresh": str(refresh),
             "access": str(refresh.access_token),
             "detail": "Login successful!"
+        }, status=status.HTTP_200_OK)
+
+class GoogleLoginView(APIView):
+    def post(self, request):
+        token = request.data.get('token') #from frontend, google will receive token
+        if not token:
+            return Response({"error": "Token is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        #token verification
+        google_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={token}"
+        response = requests.get(google_url)
+        if response.status_code != 200:
+            return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        data = response.json()
+        email = data.get('email')
+        name = data.get('name')
+
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user, created = CustomUser.objects.get_or_create(email=email, defaults={'phone': '', 'role': 'candidate'})
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "email": email,
+            "name": user.first_name,
+            "is_new_user": created
         }, status=status.HTTP_200_OK)
