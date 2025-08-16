@@ -25,6 +25,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = "accounts.CustomUser"
 
 # Application definition
 
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'company',
     'applications',
     'candidates',
+    'accounts',
 ]
 
 MIDDLEWARE = [

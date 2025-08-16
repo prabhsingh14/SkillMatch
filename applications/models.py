@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 class JobApplication(models.Model):
     candidate = models.ForeignKey('candidates.Candidate', on_delete=models.CASCADE, related_name='applications')

@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 import os
+from django.conf import settings
 
 def validate_pdf(value):
     ext = os.path.splitext(value.name)[1]
@@ -9,10 +10,14 @@ def validate_pdf(value):
         raise ValidationError("Only PDF files are allowed.")
 
 class Candidate(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='candidate_profile',
+        default=1
+    )
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=15)
     resume = models.FileField(upload_to='resumes/', validators=[validate_pdf])
     profile_summary = models.TextField(blank=True, null=True)  # AI-generated or self-written
     improvement_tips = models.JSONField(default=list, blank=True)  # AI suggestions

@@ -1,14 +1,10 @@
 from django.db import models
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from django.conf import settings
 
 # Create your models here.
 class Company(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='company_profile')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='company_profile')
     name = models.CharField(max_length=200)
-    email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=15, blank=True, null=True)
     website = models.URLField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
