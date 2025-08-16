@@ -9,7 +9,6 @@ def validate_pdf(value):
         raise ValidationError("Only PDF files are allowed.")
 
 class Candidate(models.Model):
-    user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='candidate_profile', default=1)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
@@ -19,6 +18,8 @@ class Candidate(models.Model):
     improvement_tips = models.JSONField(default=list, blank=True)  # AI suggestions
     skills = models.ManyToManyField('core.Skill', related_name='candidates')
     experience_years = models.PositiveIntegerField(default=0)
+    location_preference = models.CharField(max_length=100, blank=True, null=True)
+    desired_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
