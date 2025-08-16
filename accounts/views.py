@@ -106,3 +106,14 @@ class GoogleLoginView(APIView):
             "name": user.first_name,
             "is_new_user": created
         }, status=status.HTTP_200_OK)
+
+class LogoutView(APIView):
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response({"detail": "Logout successful"}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
