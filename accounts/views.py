@@ -9,6 +9,7 @@ from datetime import timedelta
 from .serializers import UserSerializer, SendOTPSerializer, VerifyOTPSerializer
 from .models import CustomUser, EmailOTP
 import requests
+from utils.get_tokens_for_users import get_tokens_for_user
 
 #list all users -- admin only
 class UserListView(generics.ListAPIView):
@@ -16,12 +17,19 @@ class UserListView(generics.ListAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
 
-#create user -- signup
-class UserCreateView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
+#retrieve, update, delete user -- user detail view
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+#send otp
 class SendOTPView(APIView):
     def post(self, request):
         serializer = SendOTPSerializer(data=request.data)
@@ -43,6 +51,7 @@ class SendOTPView(APIView):
             "detail": "OTP sent successfully"
         }, status=status.HTTP_200_OK)
 
+#verify otp
 class VerifyOTPView(APIView):
     def post(self, request):
         serializer = VerifyOTPSerializer(data=request.data)
@@ -67,15 +76,14 @@ class VerifyOTPView(APIView):
         otp.is_used = True
         otp.save()
 
-        #auto login
-        refresh = RefreshToken.for_user(user)
+        tokens = get_tokens_for_user(user)
 
         return Response({
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "detail": "Login successful!"
+            **tokens,
+            "detail": "Login successful!",
         }, status=status.HTTP_200_OK)
 
+#login via google
 class GoogleLoginView(APIView):
     def post(self, request):
         token = request.data.get('token') #from frontend, google will receive token
@@ -97,17 +105,19 @@ class GoogleLoginView(APIView):
         
         user, created = CustomUser.objects.get_or_create(email=email, defaults={'phone': '', 'role': 'candidate'})
 
-        refresh = RefreshToken.for_user(user)
+        tokens = get_tokens_for_user(user)
 
         return Response({
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
+            **tokens,
             "email": email,
             "name": user.first_name,
             "is_new_user": created
         }, status=status.HTTP_200_OK)
 
+#logout
 class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
         try:
             refresh_token = request.data["refresh"]
@@ -117,3 +127,28 @@ class LogoutView(APIView):
             return Response({"detail": "Logout successful"}, status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+#list available roles
+class RoleListView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        roles = [choice[0] for choice in CustomUser.ROLE_CHOICES]
+        return Response({"roles": roles}, status=status.HTTP_200_OK)
+
+#assign or update logged-in user's role
+class RoleAssignView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        role = request.data.get("role")
+        if role not in dict(CustomUser.ROLE_CHOICES):
+            return Response({
+                "error": "Invalid role",
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+        user.role = role
+        user.save()
+
+        return Response({"detail": "Role updated successfully"}, status=status.HTTP_200_OK)
