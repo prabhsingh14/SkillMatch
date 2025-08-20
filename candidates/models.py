@@ -25,6 +25,7 @@ class Candidate(models.Model):
     experience_years = models.PositiveIntegerField(default=0)
     location_preference = models.CharField(max_length=100, blank=True, null=True)
     desired_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    interested_roles = models.JSONField(default=list, blank=True) #for matching with external sources jobs
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
