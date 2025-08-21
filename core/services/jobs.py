@@ -23,11 +23,11 @@ def fetch_jobs(title=None, location=None, company=None, experience=None, job_typ
     
     # Prepare headers with API key
     headers = {}
-    api_key = config('INDIAAPI_JOBS_KEY', default=None)
+    api_key = config('INDIANAPI_JOBS_KEY', default=None)
     if api_key:
         headers['X-Api-Key'] = api_key
     else:
-        print("⚠️ Warning: No API key found. Set INDIAAPI_JOBS_KEY in your .env file")
+        print("⚠️ Warning: No API key found. Set INDIANAPI_JOBS_KEY in your .env file")
         return {"error": "API key is required"}
     
     try:

@@ -26,14 +26,12 @@ class Job(models.Model):
         ('full_time', 'Full Time'),
         ('part_time', 'Part Time'),
         ('contract', 'Contract'),
-        ('intern', 'Intern'),
+        ('internship', 'Internship'),
     ])
     salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     source = models.CharField(max_length=50, choices=[
         ('internal', 'Internal'),
-        ('jooble', 'Jooble'),
-        ('adzuna', 'Adzuna'),
-        ('usajobs', 'USAJobs')
+        ('indianapi', 'IndianAPI'),
     ], default='internal', db_index=True)
     source_url = models.URLField(blank=True, null=True)
     posted_at = models.DateTimeField(null=True, blank=True)  # for external sources jobs
