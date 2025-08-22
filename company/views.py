@@ -2,12 +2,15 @@ import requests
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.views import APIView
 
 from .models import Job, Company
 from .serializers import JobSerializer, CompanySerializer
 from .permissions import IsEmployer
+from .services.job_parser import parse_job_description_and_update
 
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 class IsAdminUser(permissions.BasePermission):
     """
@@ -34,6 +37,16 @@ class CompanyDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Company.objects.filter(user=self.request.user)
+
+'''PARSE'''
+
+class JobAutoParseView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsEmployer]
+
+    def post(self, request, pk):
+        job = get_object_or_404(Job, pk=pk, company=request.user.company_profile)
+        result = parse_job_description_and_update(job, request.data)
+        return Response(result, status=status.HTTP_200_OK)
 
 #job management
 class JobCreateView(generics.CreateAPIView):

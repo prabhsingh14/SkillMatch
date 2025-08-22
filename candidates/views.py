@@ -8,10 +8,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Candidate
 from .serializers import CandidateSerializer
 from .permissions import IsCandidate
+from .services.resume_parser import parse_resume_and_update
 
 class ResumeUpload(generics.CreateAPIView):
     queryset = Candidate.objects.all()
@@ -29,43 +31,21 @@ class ResumeUpload(generics.CreateAPIView):
 
         serializer.save(user=user)
 
-class ResumeParser(APIView):
+class ResumeAutoParseView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsCandidate]
-    parser_classes = [MultiPartParser, FormParser]
 
-    def post(self, request, *args, **kwargs):
-        resume_file = request.FILES.get('resume')
-        if not resume_file:
+    def post(self, request):
+        candidate = request.user.candidate_profile
+        if not candidate.resume:
             return Response({
-                "error": "No resume file provided."
+                "error": "No resume uploaded."
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        file_ext = os.path.splitext(resume_file.name)[1].lower()
-        if file_ext != ".pdf":
-            return Response({
-                "error": "Only PDF files are allowed."
-            }, status=status.HTTP_400_BAD_REQUEST)
+        with candidate.resume.open('rb') as resume_file:
+            result = parse_resume_and_update(candidate, resume_file)
         
-        extracted_text = ""
-        
-        try:
-            pdf_reader = PdfReader(resume_file)
-            if pdf_reader.is_encrypted:
-                return Response({
-                    "error": "The PDF file is encrypted and cannot be processed."
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-            extracted_text =  " ".join([page.extract_text() or "" for page in pdf_reader.pages])
-
-        except Exception as e:
-            return Response({
-                "error": "Failed to extract text from PDF."
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({
-            "extracted_text": extracted_text
-        }, status=status.HTTP_200_OK)
-
+        return Response(result, status=status.HTTP_200_OK)
+    
 class ResumeListView(generics.ListAPIView):
     serializer_class = CandidateSerializer
     permission_classes = [permissions.IsAuthenticated]
