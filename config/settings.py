@@ -39,6 +39,8 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET')
 
+YOUTUBE_API_KEY = config('YOUTUBE_API_KEY')
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -64,6 +66,7 @@ INSTALLED_APPS = [
     'applications',
     'candidates',
     'accounts',
+    'learning',
 ]
 
 MIDDLEWARE = [
