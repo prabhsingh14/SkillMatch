@@ -41,6 +41,8 @@ GOOGLE_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET')
 
 YOUTUBE_API_KEY = config('YOUTUBE_API_KEY')
 
+OPENAI_API_KEY = config('OPENAI_API_KEY')
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -125,7 +127,12 @@ DATABASES = {
     }
 }
 
-
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "recruiter-dashboard-cache",
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
