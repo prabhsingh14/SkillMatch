@@ -2,7 +2,7 @@
 
 **SkillMatch** is an intelligent job matching platform that connects candidates with employers through advanced AI-driven matching algorithms, resume parsing, and personalized learning recommendations.
 
-## Features
+## 🚀 Features
 
 ### For Candidates
 - **Smart Resume Upload & Parsing**: PDF resume analysis with automatic skill extraction
