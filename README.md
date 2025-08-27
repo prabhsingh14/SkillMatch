@@ -49,10 +49,6 @@
 - `python-decouple`: Environment configuration
 - `django-cors-headers`: Cross-origin resource sharing
 
-## Architecture
-![Uploading architecture.png…]()
-
-
 ## 📁 Project Structure
 
 ```
