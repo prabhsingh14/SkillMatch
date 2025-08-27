@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'candidates',
     'accounts',
     'learning',
+    'explanations',
 ]
 
 MIDDLEWARE = [
